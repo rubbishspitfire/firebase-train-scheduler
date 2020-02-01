@@ -6,110 +6,77 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>My Train Time</title>
 
-    <!-- Bootstrap -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-
-    <!-- My CSS StyleSheet-->
-    <link rel="stylesheet" type="text/css" href="./assests/css/style.css">
-
-    <!-- Font Awesome CSS Icons -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
-
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/5.0.4/firebase.js"></script>
-
-    <!-- Moment.js-->    
-    <script src="https://cdn.jsdelivr.net/momentjs/2.12.0/moment.min.js"></script>
-
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script src="https://www.gstatic.com/firebasejs/7.8.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/6.0.4/firebase-database.js"></script>     
 </head>
-
-
 <body>
-    <div class="container">
-
-        <!-- Jumbotron for Title-->
-        <div class="jumbotorn" style="background-color: black; color: ghostwhite;">
-            <h1 class="text-center">
-                <strong>Welcome Abroad</strong>
-            </h1>
-        </div>
-
-        <div class="row">
-            <div class="col-sm-12">
-                <div class="card text-ghostwhite">
+     <div class="container">
+         <div class="jumbotron jumbotron-fluid">
+             <div class="container">
+                 <h1 class="display-4">Anytime is Train Time</h1>
+                 <p class="lead">Welcome Aboard. Please check the following train information on the board</p>
+             </div>
+         </div>
+            <div class="card">
                     <div class="card-header">
-                        <strong>Current Train Schedule</strong>
+                        Trains:
                     </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                             <th>Train Name</th>
+                             <th>Destination</th>
+                             <th>Frequency(min)</th>
+                             <th>Next Arrival</th>
+                             <th>Minutes Away</th>
+                            </tr>
+                        </thead>
+                    <tbody>
+                        <tbody id="all-display"></tbody>
+                    </tbody>
+                </table>
+            </div>
+                          
+            
 
-                    <div class="card-body" id="article-section">
-                        <table class="table table-sm table-hover" id="train-table">
-                            <thead>
-                                <tr>
-                                    <th scope="col">Train Name</th>
-                                    <th scope="col">Destination</th>
-                                    <th scope="col">Frequency</th>
-                                    <th scope="col">Arrival Time</th>
-                                    <th scope="col">Minutes Away</th>
-                                </tr>
-                            </thead>
-                        </table>
-                    </div>
+            <div class="card">
+                <div class="card-header">
+                    Add Train
+                </div>
+                <div class="row">
+                    <div class="col-lg-12">
+
+                    <div class="panel-body">
+                        <div/div>
+                            <div class="form-group">
+                                <label for="train-name">Train Name</label>
+                                <input class="form-control" id="trainName" type="text">
+                            </div>
+                            <div class="form-group">
+                                <label for="destination">Destination</label>
+                                <input class="form-control" id="destination" type="text">
+                            </div>
+                            <div class="form-group">
+                                <label for="first-train-time">First Train Time (HH:mm)</label>
+                                <input class="form-control" id="firstTrain" type="text">
+                            </div>
+                            <div class="form-group">
+                                <label for="train-frequency">Frequency (min)</label>
+                                <input class="form-control" id="interval" type="text">
+                            </div>
+                            <button class="btn btn-primary" id="addTrain" type="submit">Submit</button>
+                        </form>
+                    </div>        
                 </div>
             </div>
-        </div>
-    
-        <!-- Searching Train Specifications -->
-        <div class="row">
-            <div class="col-sm-12">
-                <br>           
-        <div class="card-body">
-            <form role="form">
-                <div class="form-group">
-                    <label for="search">Train Name</label>
-                    <input type="text" class="form-control" id="train-name-input">
-                </div>
-                <div class="form-group">
-                    <label for="search">Destination</label>
-                    <input type="text" class="form-control" id="Destination-input">
-                </div>
-                <div class="form-group">
-                    <label for="search">First Train Time (HH:mm- military time)</label>
-                    <input type="text" class="form-control" id="first-train-input">
-                </div>
-                <div class="form-group">
-                    <label for="search">Frequency</label>
-                    <input type="text" class="form-control" id="Frequency-input">
-                </div>
-
-                <button type="submit" id="submitButton">
-                    <i class="fa fa-search"></i> Submit
-                </button>
                 
-             </form>
-           </div>
-        </div>    
-    </div>
-</div>
-
-
-        <!-- Footer -->
-        <div class="row">
-            <div class="col-sm-12">
-
-                <hr>
-                <h5 class="text-center text-black">
-                    <strong><small>&Copyright 2019</small></strong>
-                </h5>
+                            
             </div>
-        </div>
-
-    </div>
-
-    
-    <!-- JavaScript Code File-->
-    <script type="tet/javascript" src="assests/javascript/app.js"></script>
-
+ 
+            <script src="https://cdn.jsdelivr.net/momentjs/2.12.0/moment.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="./assests/javascript/app.js"></script>
 </body>
 </html>
