@@ -1,26 +1,24 @@
-$(document).ready(function() {
-
-    // Startup Firebase
-var firebaseConfig = {
+// Startup Firebase
+var config = {
     apiKey: "AIzaSyBjWFysOOfGII4TDqbrVVGle5JVkIMA3Bo",
     authDomain: "train-scheduler-pc-09.firebaseapp.com",
     databaseURL: "https://train-scheduler-pc-09.firebaseio.com",
     projectId: "train-scheduler-pc-09",
 };
-    // Initialize firebase
-    firebase.initializaApp(firebaseConfig);
+// Initialize firebase
+firebase.initializaApp(config);
 
-    var database = firebase.database();
+var database = firebase.database();
 
-    // create on-click function for submit button
-    $("#add-train-btn").on("click", function(event) {
-        event.preventDefault();
+// create on-click function for submit button
+$("#add-train-btn").on("click", function (event) {
+    event.preventDefault();
 
     // User Input
     var trainName = $("#trainName").val().trim();
     var destination = $("#destination").val().trim();
-    var firstTrain= $("#firstTrain").val();
-    var frequency= $("#interval").val().trim();
+    var firstTrain = $("#firstTrain").val();
+    var frequency = $("#interval").val().trim();
 
     // Push variable data to database
     database.ref().push({
@@ -60,10 +58,4 @@ database.ref().on("child_added", function (childSnapshot) {
 
 
 
-    })
-
-
-
-
-
-})
+});
