@@ -1,157 +1,126 @@
-$(document).ready(function(){
+// Steps to complete:
+
+// 1. Create Firebase link
+// 2. Create initial train data in database
+// 3. Create button for adding new trains - then update the html + update the database
+// 4. Create a way to retrieve trains from the trainlist.
+// 5. Create a way to calculate the time way. Using difference between start and current time.
+//    Then take the difference and modulus by frequency. (This step can be completed in either 3 or 4)
     
-// Startup Firebase
+// Initialize Firebase
 var config = {
-    apiKey: "AIzaSyBjWFysOOfGII4TDqbrVVGle5JVkIMA3Bo",
-    authDomain: "train-scheduler-pc-09.firebaseapp.com",
-    databaseURL: "https://train-scheduler-pc-09.firebaseio.com",
-    projectId: "train-scheduler-pc-09",
+  apiKey: "AIzaSyASsCvpTzNVD73cEuY2gftvyGdIYHi_oe4",
+  authDomain: "traindata-47bdf.firebaseapp.com",
+  projectId: "traindata-47bdf",
+  storageBucket: "traindata-47bdf.appspot.com"
 };
 
-if (!firebase.apps.length) {
-    firebase.initializeApp(config);
-}
+firebase.initializeApp(config);
 
-// Create a variable to reference the database.
-var database = firebase.database();
+var trainData = firebase.database();
 
-var trains = [];
+// 2. Populate Firebase Database with initial data (in this case, I did this via Firebase GUI)
+// 3. Button for adding trains
+$("#add-train-btn").on("click", function() {
 
-var timer = 0;
+  // Grabs user input
+  var trainName = $("#train-name-input").val().trim();
+  var destination = $("#destination-input").val().trim();
+  var firstTrainUnix = moment($("#first-train-input").val().trim(), "HH:mm").subtract(10, "years").format("X");
+  var frequency = $("#frequency-input").val().trim();
 
-//  Variable that will hold our setInterval that runs the stopwatch
-var intervalId;
+  // Creates local "temporary" object for holding train data
+  var newTrain = {
 
-// prevents the clock from being sped up unnecessarily
-var clockRunning = false;
+    name: trainName,
+    destination: destination,
+    firstTrain: firstTrainUnix,
+    frequency: frequency
+  };
 
-function displayTable(ele) {
-    appendTableColumn($('table'), ele);
-}
+  // Uploads train data to the database
+  trainData.ref().push(newTrain);
 
-function makeTable(container, data) {
-    var table = $("table");
-    $.each(data, function (rowIndex, r) {
-        var row = $("<tr/>");
-        $.each(r, function (colIndex, c) {
-            row.append($("<t" + (rowIndex == 0 ? "h" : "d") + "/>").text(c));
-        });
-        table.append(row);
-    });
-    return container.append(table);
-}
+  // Logs everything to console
+  console.log(newTrain.name);
+  console.log(newTrain.destination);
+  console.log(firstTrainUnix);
+  console.log(newTrain.frequency);
 
-function appendTableColumn(table, rowData) {
-    var lastRow = $('<tr/>').appendTo(table.find('tbody:last'));
-    $.each(rowData, function (colIndex, c) {
-        lastRow.append($('<td/>').text(c));
-    });
+  // Alert
+  alert("Train successfully added");
 
-    return lastRow;
-}
+  // Clears all of the text-boxes
+  $("#train-name-input").val("");
+  $("#destination-input").val("");
+  $("#first-train-input").val("");
+  $("#frequency-input").val("");
 
-function editRow(row) {
-    $('td', row).each(function () {
-        $(this).html('<input type="text" value="' + $(this).html() + '" />');
-    });
-}
-
-function retrieveTravels() {
-    // debugger
-    var rootRef = database.ref();
-    var urlRef = rootRef.once("value", function(snapshot){
-        snapshot.forEach(function (child) {
-            var trainTable = makeTable($(document.table), 
-                    [[child.val().name, child.val().destination, child.val().frequency, child.val().nextArrive, child.val().away]]);
-            trains.push([child.val().name, child.val().destination, child.val().frequency, child.val().nextArrive, child.val().away]);
-        });
-    });
-}
-
-function databasePush(name, destination, frequency, nextArrive, away) {
-    database.ref().push({
-        name: name,
-        destination: destination,
-        frequency: frequency,
-        nextArrive: nextArrive,
-        away: away
-    });
-}
-
-function calculateNextArrival(eventTime, currentTime, duration, diffTime, data) {
-    // how calculate retention time for current and nextarrival
-    var interval = 1000; 
-    diffTime = eventTime - currentTime;
-    var fromDate = moment.utc(eventTime);// Timestamp 13:00 GMT
-    var toDate = moment(fromDate, 'hh:mm a').format('hh:mm a');// Timestamp 13:00 PM
-    toDate.add('mm:ss', duration);
-
-    duration = moment.duration(diffTime * 1000, 'milliseconds');
-    
-    var hourDiff = toDate.diff(fromDate, 'hours');
-    var minuteDiff = toDate.diff(fromDate, 'minutes');
-    hourDuration = Math.floor(minuteDiff / 60);
-    minuteDuration = minuteDiff % 60;
-    toDate.toISOString();
-
-    setInterval(function () {
-        duration = moment.duration(duration - interval, 'milliseconds');
-        appendTableColumn($('table'),data);// refresh the rowTable
-        // $('table > tbody'+ ).text(duration.hours() + ":" + duration.minutes() + ":" + duration.seconds())
-    }, interval);
-};
-
-$('th').on('click', function(){
-    debugger
-    editRow(this);
+  // Determine when the next train arrives.
+  return false;
 });
 
-$("#submit").on("click", function (event) {
-    // prevent page from refreshing when form tries to submit itself
-    debugger
-    event.preventDefault();
-    
-    // Capture user inputs and store them into variables
+// 4. Create Firebase event for adding trains to the database and a row in the html when a user adds an entry
+trainData.ref().on("child_added", function(childSnapshot, prevChildKey) {
 
-    var name = $("#name").val().trim();
-    var destination = $("#destination").val().trim();
+  console.log(childSnapshot.val());
 
-    var firstTime = $("#firstTime").val().trim();
+  // Store everything into a variable.
+  var tName = childSnapshot.val().name;
+  var tDestination = childSnapshot.val().destination;
+  var tFrequency = childSnapshot.val().frequency;
+  var tFirstTrain = childSnapshot.val().firstTrain;
 
-    var frequency = $("#frequency").val().trim();
+  // Calculate the minutes until arrival using hardcore math
+  // To calculate the minutes till arrival, take the current time in unix subtract the FirstTrain time
+  // and find the modulus between the difference and the frequency.
+  var differenceTimes = moment().diff(moment.unix(tFirstTrain), "minutes");
+  var tRemainder = moment().diff(moment.unix(tFirstTrain), "minutes") % tFrequency;
+  var tMinutes = tFrequency - tRemainder;
 
-    var nextArrive = "3:00 PM";
-    var away = "2";
+  // To calculate the arrival time, add the tMinutes to the currrent time
+  var tArrival = moment().add(tMinutes, "m").format("hh:mm A");
 
-    // calculateNextArrival(firstTime, nextArrive, frequency, away);
+  console.log(tMinutes);
+  console.log(tArrival);
+  console.log(moment().format("hh:mm A"));
+  console.log(tArrival);
+  console.log(moment().format("X"));
 
-// nextArrive = moment(firstTime).add(frequency, 'hh:mm A').format("HH:mm A");
-// away = moment(nextArrive).diff(firstTime, 'HH');
-
-    databasePush(name, destination, frequency, nextArrive, away);
-    var obj;
-    database.ref().limitToLast(1).on("child_added", function(snapshot){
-        console.log(snapshot.val());
-        if (snapshot.child("name").exists() &&
-                snapshot.child("destination").exists() &&
-                snapshot.child("frequency").exists() &&
-                snapshot.child("nextArrive").exists() &&
-                snapshot.child("away").exists())
-        {
-
-            obj = [
-                snapshot.val().name,
-                snapshot.val().destination,
-                snapshot.val().frequency,
-                snapshot.val().nextArrive,
-                snapshot.val().away
-            ]
-            trains.push(obj);
-        }
-    });
-    displayTable(obj);
+  // Add each train's data into the table
+  $("#train-table > tbody").append("<tr><td>" + tName + "</td><td>" + tDestination + "</td><td>"
+  + tFrequency + "</td><td>" + tArrival + "</td><td>" + tMinutes + "</td></tr>");
 });
 
-retrieveTravels();
+// Assume the following situations.
 
-});
+// (TEST 1)
+// First Train of the Day is 3:00 AM
+// Assume Train comes every 3 minutes.
+// Assume the current time is 3:16 AM....
+// What time would the next train be...? ( Let's use our brains first)
+// It would be 3:18 -- 2 minutes away
+
+// (TEST 2)
+// First Train of the Day is 3:00 AM
+// Assume Train comes every 7 minutes.
+// Assume the current time is 3:16 AM....
+// What time would the next train be...? (Let's use our brains first)
+// It would be 3:21 -- 5 minutes away
+
+
+// ==========================================================
+
+// Solved Mathematically
+// Test case 1:
+// 16 - 00 = 16
+// 16 % 3 = 1 (Modulus is the remainder)
+// 3 - 1 = 2 minutes away
+// 2 + 3:16 = 3:18
+
+// Solved Mathematically
+// Test case 2:
+// 16 - 00 = 16
+// 16 % 7 = 2 (Modulus is the remainder)
+// 7 - 2 = 5 minutes away
+// 5 + 3:16 = 3:21
